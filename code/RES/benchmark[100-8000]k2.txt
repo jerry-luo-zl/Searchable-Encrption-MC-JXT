@@ -1,0 +1,130 @@
+=======================Benchmark100=======================
+GenTables time: 129569500 ns
+XSet setup time     : 94316042
+TSet setup time     : 214632666
+EDBSetup time: 310223667 ns
+Length of t1:5
+Length of t2:57
+Verify evn time     : 306875
+Gen xtoken time     : 212334
+Match time          : 964333
+Contains time       : 28500
+Search time: 1804917 ns
+Search result: 2 pair
+=======================Benchmark500=======================
+GenTables time: 6920542 ns
+XSet setup time     : 94282833
+TSet setup time     : 440976458
+EDBSetup time: 535491791 ns
+Length of t1:20
+Length of t2:291
+Verify evn time     : 274167
+Gen xtoken time     : 486583
+Match time          : 24427333
+Contains time       : 39375
+Search time: 25556000 ns
+Search result: 8 pair
+=======================Benchmark1000=======================
+GenTables time: 8081875 ns
+XSet setup time     : 59076916
+TSet setup time     : 556625709
+EDBSetup time: 616004709 ns
+Length of t1:31
+Length of t2:568
+Verify evn time     : 255625
+Gen xtoken time     : 607750
+Match time          : 134230750
+Contains time       : 37125
+Search time: 135497458 ns
+Search result: 17 pair
+=======================Benchmark2000=======================
+GenTables time: 12352875 ns
+XSet setup time     : 107450292
+TSet setup time     : 1076160375
+EDBSetup time: 1184001667 ns
+Length of t1:55
+Length of t2:1166
+Verify evn time     : 106208
+Gen xtoken time     : 1189125
+Match time          : 887106208
+Contains time       : 47792
+Search time: 888768333 ns
+Search result: 31 pair
+=======================Benchmark3000=======================
+GenTables time: 12960208 ns
+XSet setup time     : 160071917
+TSet setup time     : 1567216583
+EDBSetup time: 1727630292 ns
+Length of t1:84
+Length of t2:1739
+Verify evn time     : 199500
+Gen xtoken time     : 1716250
+Match time          : 2896580208
+Contains time       : 84959
+Search time: 2898933209 ns
+Search result: 36 pair
+=======================Benchmark4000=======================
+GenTables time: 16015834 ns
+XSet setup time     : 212504125
+TSet setup time     : 2077568542
+EDBSetup time: 2290285833 ns
+Length of t1:136
+Length of t2:2385
+Verify evn time     : 98250
+Gen xtoken time     : 1605542
+Match time          : 8921977250
+Contains time       : 57208
+Search time: 8924114292 ns
+Search result: 70 pair
+=======================Benchmark5000=======================
+GenTables time: 18531708 ns
+XSet setup time     : 265660500
+TSet setup time     : 2574796917
+EDBSetup time: 2840618875 ns
+Length of t1:152
+Length of t2:2997
+Verify evn time     : 281291
+Gen xtoken time     : 1915334
+Match time          : 16719390541
+Contains time       : 105208
+Search time: 16722349250 ns
+Search result: 91 pair
+=======================Benchmark6000=======================
+GenTables time: 23188792 ns
+XSet setup time     : 322857541
+TSet setup time     : 3125329167
+EDBSetup time: 3448343708 ns
+Length of t1:192
+Length of t2:3551
+Verify evn time     : 143292
+Gen xtoken time     : 2174750
+Match time          : 32270968666
+Contains time       : 81834
+Search time: 32273485042 ns
+Search result: 112 pair
+=======================Benchmark7000=======================
+GenTables time: 25962875 ns
+XSet setup time     : 379081250
+TSet setup time     : 3988566959
+EDBSetup time: 4367853417 ns
+Length of t1:210
+Length of t2:4133
+Verify evn time     : 116709
+Gen xtoken time     : 7569791
+Match time          : 48576735167
+Contains time       : 101083
+Search time: 48584783292 ns
+Search result: 124 pair
+=======================Benchmark8000=======================
+GenTables time: 29827792 ns
+XSet setup time     : 430523125
+TSet setup time     : 4812767959
+EDBSetup time: 5243411291 ns
+Length of t1:248
+Length of t2:4804
+Verify evn time     : 86709
+Gen xtoken time     : 31260500
+Match time          : 77579948166
+Contains time       : 153041
+Search time: 77611561375 ns
+Search result: 144 pair

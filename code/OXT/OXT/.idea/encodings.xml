@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="Encoding">
+    <file url="file://$PROJECT_DIR$/lib" charset="GBK" />
+    <file url="file://$PROJECT_DIR$/params" charset="GBK" />
+    <file url="file://$PROJECT_DIR$/src/main/java/client/entity/OXTEDB.java" charset="GBK" />
+    <file url="file://$PROJECT_DIR$/src/main/java/client/entity/OXTTSetBlock.java" charset="GBK" />
+    <file url="file://$PROJECT_DIR$/src/main/java/client/entity/OXTTSetTuple.java" charset="GBK" />
+  </component>
+</project>
