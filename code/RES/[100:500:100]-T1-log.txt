@@ -1,0 +1,75 @@
+=======================Benchmark100=======================
+GenTables time: 118591250 ns
+T nums: 1
+XSet setup time     : 78474208
+TSet setup time     : 162608292
+EDBSetup time: 248752417 ns
+joinAttr nums: 1
+Length of t1:11
+Length of t2:52
+Verify evn time     : 339542
+Gen xtoken time     : 127583
+Match time          : 2829375
+Contains time       : 58208
+Search time: 3635375 ns
+Search result: 5 pair
+=======================Benchmark200=======================
+GenTables time: 4505542 ns
+T nums: 1
+XSet setup time     : 15598042
+TSet setup time     : 180296042
+EDBSetup time: 196309041 ns
+joinAttr nums: 1
+Length of t1:15
+Length of t2:129
+Verify evn time     : 302833
+Gen xtoken time     : 521625
+Match time          : 4402167
+Contains time       : 33792
+Search time: 5639958 ns
+Search result: 7 pair
+=======================Benchmark300=======================
+GenTables time: 3517708 ns
+T nums: 1
+XSet setup time     : 15480666
+TSet setup time     : 155576084
+EDBSetup time: 171483334 ns
+joinAttr nums: 1
+Length of t1:40
+Length of t2:172
+Verify evn time     : 246750
+Gen xtoken time     : 279875
+Match time          : 11305542
+Contains time       : 103875
+Search time: 12211125 ns
+Search result: 23 pair
+=======================Benchmark400=======================
+GenTables time: 3762417 ns
+T nums: 1
+XSet setup time     : 12807833
+TSet setup time     : 158924542
+EDBSetup time: 172160125 ns
+joinAttr nums: 1
+Length of t1:56
+Length of t2:232
+Verify evn time     : 165708
+Gen xtoken time     : 320333
+Match time          : 14625042
+Contains time       : 37417
+Search time: 15471541 ns
+Search result: 35 pair
+=======================Benchmark500=======================
+GenTables time: 4170584 ns
+T nums: 1
+XSet setup time     : 11560667
+TSet setup time     : 171881375
+EDBSetup time: 183879000 ns
+joinAttr nums: 1
+Length of t1:64
+Length of t2:310
+Verify evn time     : 119375
+Gen xtoken time     : 314209
+Match time          : 18910958
+Contains time       : 79500
+Search time: 19769833 ns
+Search result: 41 pair

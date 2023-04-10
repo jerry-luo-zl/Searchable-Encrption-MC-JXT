@@ -2,6 +2,7 @@ package jxt1.entity;
 
 
 import jxt1.entity.JXTTSetBlock;
+import java.lang.Math;
 
 import java.util.HashMap;
 import java.util.Vector;
@@ -25,10 +26,12 @@ public class JXTEDB {
                 TSet[i][j] = new JXTTSetBlock();
         */
     	
-        
+    	double errRate = Math.pow(2, -20);
+    	int capacity = 300000;
+    	
         XSet= new JXTXSetBlock[tabNum];
         for(int i=0; i<tabNum; i++)
-        	XSet[i] = new JXTXSetBlock();
+        	XSet[i] = new JXTXSetBlock(capacity, errRate);
         
         TArr = new JXTTArrBlock[tabNum];
         for (int i=0; i<tabNum; i++) {

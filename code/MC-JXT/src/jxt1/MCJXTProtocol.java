@@ -5,7 +5,6 @@ import java.security.InvalidAlgorithmParameterException;
 import it.unisa.dia.gas.jpbc.Pairing;
 import it.unisa.dia.gas.plaf.jpbc.pairing.PairingFactory;
 
-
 import java.awt.Cursor;
 import java.awt.print.Printable;
 import java.io.File;
@@ -14,6 +13,7 @@ import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.lang.invoke.StringConcatFactory;
 import java.math.BigInteger;
 import java.security.SecureRandom;
 import java.sql.Connection;
@@ -54,7 +54,6 @@ import util.Hash;
 import util.IntAndByte;
 import util.InvertIndex;
 import util.TableFilesBlock;
-import util.TableManager;
 
 import org.sqlite.*;
 
@@ -79,7 +78,21 @@ public class MCJXTProtocol {
 	public AuthEnc authEncer = new AuthEnc();
 	public Vector<String> policy = new Vector<String>();
 
-	public MCJXTProtocol() {
+	public MCJXTProtocol(String dbPath, Vector<Integer> Tt) {
+		try {
+			long genTablesTime1 = System.nanoTime();
+			genTables(dbPath);
+			long genTablesTime2 = System.nanoTime();
+			
+			System.out.printf("GenTables time: %d ns\n",genTablesTime2-genTablesTime1);
+			
+		} catch (Exception e) {
+			System.out.print("class not found");
+			e.printStackTrace();
+		}
+		this.m = tabs.get(0).recs.size();
+		this.n = tabs.get(0).attrs.size();
+		this.T = Tt;
 		
 	}
 	
@@ -160,12 +173,6 @@ public class MCJXTProtocol {
 		this.tabs.add(stateCensus);
 		this.tabs.add(raceCensus);
 		
-		//this.T.addAll(Arrays.asList(0,1,2));
-		this.T.addAll(Arrays.asList(0));
-
-		this.m = tabs.get(0).recs.size();
-		this.n = tabs.get(0).attrs.size();
-		
 	}
 		
 	public void providerEDBSetup() {
@@ -175,7 +182,6 @@ public class MCJXTProtocol {
 		 * 将明文数据库作为输入，并生成加密数据库EDB，该数据库将外包给(不受信任的)服务器。 加密数据库EDB由两种数据结构组成——TSet和XSet。
 		 * EDBSetup协议还生成一个密钥K，该密钥存储在客户端本地，随后用于生成查询令牌。
 		 */
-
 		jxtedb = new JXTEDB(tabs.size(), m, n, T.size());
 		// 指定key
 		byte[] K_I = { 3 };
@@ -208,7 +214,8 @@ public class MCJXTProtocol {
 					byte[] xindt = AES.encrypt(xind1, IntAndByte.toByteArray(t));
 					byte[] xwt = AES.encrypt(wt.getBytes(), jxtedb.K.K_W);
 					Element xtagt = Hash.HashToZr(pairing, xindt).add(Hash.HashToZr(pairing, xwt)).getImmutable();
-					jxtedb.XSet[i].xtag.add(xtagt.toString());
+					jxtedb.XSet[i].xtagLst.put(xtagt.toString());
+					//jxtedb.XSet[i].xtag.add(xtagt.toString());
 				}
 			}
 		}
@@ -407,7 +414,8 @@ public Token providerGenTokens(int i, int j, String w1, String w2, Vector<Intege
 					
 					Element tmp = xtoken1[c1-1][t].add(xtoken2[c2-1][t]).getImmutable();
 					// System.out.print(tmp.toString()+"\n");
-					if (!jxtedb.XSet[j].xtag.contains(tmp.toString())) {
+					if (!jxtedb.XSet[j].xtagLst.mightContain(tmp.toString())) {
+					//if (!jxtedb.XSet[j].xtag.contains(tmp.toString())) {
 						flag = false;
 						break;
 					}
@@ -436,122 +444,111 @@ public Token providerGenTokens(int i, int j, String w1, String w2, Vector<Intege
 		return resIndPair;
 	}
 	
-	public Vector<Vector<Integer>> benchmark(int i, int j, String w1, String w2, 
-										Vector<String> strjoinAttrs, FileWriter writer) throws IOException {
-		
-		// Pre-process: 将joinAttr转化为标号
-		Vector<Integer> joinAttrs = new Vector<Integer>();
-		for (String s : strjoinAttrs) {
-			joinAttrs.add(attrsAll.indexOf(s));
-		}
-		// 将w1, w2进行转换
-		
-		String a1 = w1.substring(1,w1.length()-1);
-		String b1 = a1.substring(0, a1.indexOf(","));
-		w1 = w1.replace(b1, String.valueOf(attrsAll.indexOf(b1)));
-		
-		String a2 = w2.substring(1,w2.length()-1);
-		String b2 = a2.substring(0, a2.indexOf(","));
-		w2 = w2.replace(b2, String.valueOf(attrsAll.indexOf(b2)));
-		
-		long timeEDB1 = System.nanoTime();
-		// Data owner: EDBSetup
-		providerEDBSetup();
-		long timeEDB2 = System.nanoTime();
-		writer.write(String.valueOf(timeEDB2-timeEDB1)+" ");
-		System.out.printf("EDBSetup time: %d ns\n",timeEDB2-timeEDB1);
-		
-		// Data owner: Set policy
-		providerSetPolicy();
-		
-		// Data owner: 审查query, 生成token=(bxtrap, stag, env, KC, KC', K_enc)
-		Token token = providerGenTokens(i, j, w1, w2, joinAttrs);
-		
-		
-		// Client: 利用token中获得的k_enc本地计算解密文档id的key
-		byte[] Kw1 = AES.encrypt(w1.getBytes(), jxtedb.K.K_enc);
-		byte[] Kw2 = AES.encrypt(w2.getBytes(), jxtedb.K.K_enc);
-		
-		// Client: 利用token中的bxtrap以及KC1, KC2生成bxjointoken
-		int Mask = m;
-		Vector<Element[]> bxjointoken = this.clientGenXJoinTokens(w1, w2, token.bxtrap1, 
-														token.bxtrap2, Mask);
-		long timeSearch1 = System.nanoTime();
-		// Sever: 和data onwer share macKey和authKey, 并使用bxjointoken进行Search
-		Vector<Vector<byte[]>> encResIndPair = serverSearch(bxjointoken.get(0), bxjointoken.get(1)
-				, i, j, token.env, joinAttrs);
-		long timeSearch2 = System.nanoTime();
-		
-		writer.write(String.valueOf(timeSearch2-timeSearch1)+"\n");
-		System.out.printf("Search time: %d ns\n",timeSearch2-timeSearch1);
-		
-		
-		// Client: decrypt and get result
-		Vector<Vector<Integer>> resIndPair = new Vector<Vector<Integer>>();
-		for (Vector<byte[]> p : encResIndPair) { // pair (ct1, ct2)
-			Vector<Integer> t = new Vector<Integer>();
-			Integer ind1 = IntAndByte.toInt(AES.decrypt(p.get(0), Kw1));
-			Integer ind2 = IntAndByte.toInt(AES.decrypt(p.get(1), Kw2));
-			t.add(ind1);
-			t.add(ind2);
-			resIndPair.add(t);
-		}
-		
-		return resIndPair;
-	}
-	
 	public static void main(String[] args) {
 		
+		String rootDir = "/Users/lzl/Doc/GraduationProj/code/";
 		//String w1 = "(STATE,California)";
 		//String w2 = "(RACE,White)";
-		String w1 = "(STATE,California)";
-		String w2 = "(RACE,White)";
+		int i = 0;
+		int j = 1;
+		String w1Raw = "(STATE,California)";
+		String w2Raw = "(RACE,White)";
+		Vector<Integer> Tt = new Vector<Integer>();
+		Tt.addAll(Arrays.asList(0,1,2));
+		Vector<Integer> dataSize = new Vector<Integer>();
+		for (int c=500; c<=15000; c+=500)
+			dataSize.add(c);
 		
-		Vector<String> joinAttr = new Vector<String>();
-		//joinAttr.add("FIRSTNAME");
-		//joinAttr.add("LASTNAME");
-		joinAttr.add("PERSONID");
+		String dir1 = rootDir + "RES/"+"[500:15000:500]-T3-"+w1Raw+w2Raw+".txt";
 		
-		String dir = "/Users/lzl/Doc/Notes/research/code/RES/benchmark[100-8000]5.txt";
-		File file = new File(dir);
 		try {
-			if (!file.exists())
-				file.createNewFile();
-
-			FileWriter writer = new FileWriter(file);
+			File file1 = new File(dir1);
+			if (!file1.exists())
+				file1.createNewFile();
 			
-			Vector<Integer> dataSize = new Vector<Integer>();
-			dataSize.addAll(new ArrayList<Integer>(Arrays.asList(100, 500, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000)));
-			//dataSize.addAll(new ArrayList<Integer>(Arrays.asList(2000)));
+			FileWriter writer1 = new FileWriter(new File(dir1));
+			
 			for (Integer size : dataSize) {
-	
-				System.out.print("=======================Benchmark"+String.valueOf(size)+"=======================\n");
-				MCJXTProtocol jxtp = new MCJXTProtocol();
-				String dbPath = "/Users/lzl/Doc/Notes/research/code/DB/sample"+String.valueOf(size)+".db";
-				try {
-					long genTablesTime1 = System.nanoTime();
-					jxtp.genTables(dbPath);
-					long genTablesTime2 = System.nanoTime();
-					
-					System.out.printf("GenTables time: %d ns\n",genTablesTime2-genTablesTime1);
-					writer.write(String.valueOf(genTablesTime2-genTablesTime1)+" ");
-					
-				} catch (Exception e) {
-					System.out.print("class not found");
-					e.printStackTrace();
-				}
 				
-				Vector<Vector<Integer>> res = jxtp.benchmark(0, 1, w1, w2, joinAttr, writer);
-				System.out.print("Search result: "+String.valueOf(res.size())+" pair\n");
+				System.out.print("=======================Benchmark"+String.valueOf(size)+"=======================\n");
+				String dbPath = rootDir+"DB/sample"+String.valueOf(size)+".db";
+				MCJXTProtocol jxtp = new MCJXTProtocol(dbPath, Tt);
+				
+				String a1 =  w1Raw.substring(1,  w1Raw.length()-1);
+				String b1 = a1.substring(0, a1.indexOf(","));
+				String w1 =  w1Raw.replace(b1, String.valueOf(jxtp.attrsAll.indexOf(b1)));
+				
+				String a2 = w2Raw.substring(1,w2Raw.length()-1);
+				String b2 = a2.substring(0, a2.indexOf(","));
+				String w2 = w2Raw.replace(b2, String.valueOf(jxtp.attrsAll.indexOf(b2)));
+				
+				System.out.print("T nums: "+String.valueOf(jxtp.T.size())+"\n");
+				
+				// Data owner: EDBSetup
+				long timeEDB1 = System.nanoTime();
+				jxtp.providerEDBSetup();
+				long timeEDB2 = System.nanoTime();
+				writer1.write(String.valueOf(timeEDB2-timeEDB1)+" ");
+
+				System.out.printf("EDBSetup time: %d ns\n",timeEDB2-timeEDB1);
+				
+				for (int c=1; c<=1; c++) {
+					
+					FileWriter writer = null;
+					Vector<String> strjoinAttrs = new Vector<String>();
+					strjoinAttrs.addAll(Arrays.asList("PERSONID"));
+					writer = writer1;
+					
+					// Pre-process: 将joinAttr转化为标号
+					Vector<Integer> joinAttrs = new Vector<Integer>();
+					for (String s : strjoinAttrs) {
+						joinAttrs.add(jxtp.attrsAll.indexOf(s));
+					}
+					
+					System.out.print("joinAttr nums: "+String.valueOf(joinAttrs.size())+"\n");
+					// Data owner: Set policy
+					jxtp.providerSetPolicy();
+					
+					// Data owner: 审查query, 生成token=(bxtrap, env, KC, KC', K_enc)
+					Token token = jxtp.providerGenTokens(i, j, w1, w2, joinAttrs);
+					
+					// Client: 利用token中获得的k_enc本地计算解密文档id的key
+					byte[] Kw1 = AES.encrypt(w1.getBytes(), jxtp.jxtedb.K.K_enc);
+					byte[] Kw2 = AES.encrypt(w2.getBytes(), jxtp.jxtedb.K.K_enc);
+					
+					// Client: 利用token中的bxtrap以及KC1, KC2生成bxjointoken
+					Vector<Element[]> bxjointoken = jxtp.clientGenXJoinTokens(w1, w2, token.bxtrap1, 
+					token.bxtrap2, jxtp.m);
+					
+					// Sever: 和data onwer share macKey和authKey, 并使用bxjointoken进行Search
+					long timeSearch1 = System.nanoTime();
+					Vector<Vector<byte[]>> encResIndPair = jxtp.serverSearch(bxjointoken.get(0), bxjointoken.get(1)
+							, i, j, token.env, joinAttrs);
+					long timeSearch2 = System.nanoTime();
+					
+					writer.write(String.valueOf(timeSearch2-timeSearch1)+"\n");
+					System.out.printf("Search time: %d ns\n",timeSearch2-timeSearch1);
+					
+					// Client: decrypt and get result
+					Vector<Vector<Integer>> resIndPair = new Vector<Vector<Integer>>();
+					for (Vector<byte[]> p : encResIndPair) { // pair (ct1, ct2)
+						Vector<Integer> t = new Vector<Integer>();
+						Integer ind1 = IntAndByte.toInt(AES.decrypt(p.get(0), Kw1));
+						Integer ind2 = IntAndByte.toInt(AES.decrypt(p.get(1), Kw2));
+						t.add(ind1);
+						t.add(ind2);
+						resIndPair.add(t);
+					}
+					
+					System.out.print("Search result: "+String.valueOf(resIndPair.size())+" pair\n");
+					
+				}
 			}
-			writer.close();
+			writer1.close();
 		} catch (IOException e1) {
 			e1.printStackTrace();
 		}
 		
-		/*
-		
-		*/
 		/*
 		for (Vector<Integer> v : res) {
 			System.out.print("(" + v.get(0) + "," + v.get(1) + ")\n");
