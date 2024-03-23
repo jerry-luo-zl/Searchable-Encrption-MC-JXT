@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER">
+		<attributes>
+			<attribute name="module" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="lib/jpbc-api-2.0.0.jar"/>
+	<classpathentry kind="lib" path="lib/jpbc-plaf-2.0.0.jar"/>
+	<classpathentry kind="lib" path="lib/bcpkix-jdk15on-154.jar"/>
+	<classpathentry kind="lib" path="lib/bcprov-jdk16-1.46.jar"/>
+	<classpathentry kind="lib" path="lib/jpbc-crypto-2.0.0.jar"/>
+	<classpathentry kind="lib" path="lib/hamcrest-core-1.3.jar"/>
+	<classpathentry kind="lib" path="lib/junit-4.12.jar"/>
+	<classpathentry kind="lib" path="E:/failureaccess-1.0.1.jar"/>
+	<classpathentry kind="lib" path="E:/guava-31.1-jre.jar"/>
+	<classpathentry kind="lib" path="E:/slf4j-api-1.7.25.jar"/>
+	<classpathentry kind="lib" path="E:/slf4j-jdk14-1.7.25.jar"/>
+	<classpathentry kind="lib" path="E:/slf4j-log4j12-1.7.5.jar"/>
+	<classpathentry kind="lib" path="E:/sqlite-jdbc-3.45.2.0.jar"/>
+	<classpathentry kind="lib" path="E:/gson-2.10.1.jar"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>
